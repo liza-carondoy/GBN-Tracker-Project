@@ -1664,7 +1664,7 @@ function render() {
         '<td class="col-date" title="' + esc(r.dateAdded) + '">' + esc(r.dateAdded || '—') + '</td>' +
         '<td class="col-gbn" title="' + esc(r.gbn) + '">' + esc(r.gbn) + '</td>' +
         '<td class="col-guest" title="' + esc(r.guest) + '">' + esc(r.guest) + '</td>' +
-        '<td class="col-sched" title="' + esc(r.schedDate) + '">' + esc(trunc(r.schedDate, 22)) + '</td>' +
+        '<td class="col-sched" title="' + esc(cleanSchedDate(r.schedDate)) + '">' + esc(trunc(cleanSchedDate(r.schedDate), 22)) + '</td>' +
         '<td class="col-time" title="' + esc(r.time) + '">' + esc(trunc(r.time, 24)) + '</td>' +
         '<td class="col-pr">' + badgeHtml(r) + '</td>' +
         '<td class="col-status" title="' + esc(r.status) + '">' + esc(r.status || '—') + '</td>' +
@@ -1711,7 +1711,18 @@ function goPage(p) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ── DATE HELPERS ───────────────────────────────────────────────────────────────
+// ── CLEAN SCHED DATE DISPLAY ───────────────────────────────────────────────────
+// Strips leading day names (Mon, Tuesday, etc.) from stored schedDate strings
+function cleanSchedDate(str) {
+  if (!str) return '';
+  // Remove leading full day name (e.g. "Monday, " or "Tuesday ")
+  str = str.replace(/^(Sunday|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday),?\s*/i, '');
+  // Remove leading short day name (e.g. "Mon " "Tue " "Wed " etc.)
+  str = str.replace(/^(Sun|Mon|Tue|Wed|Thu|Fri|Sat)\.?\s*/i, '');
+  return str.trim();
+}
+
+
 // Convert a stored schedDate string (e.g. "Mon April 14, 2025") → "2025-04-14" for the date input
 function schedDateToInput(str) {
   if (!str) return '';
@@ -1728,9 +1739,8 @@ function inputToSchedDate(val) {
   if (!val) return '';
   var d = new Date(val + 'T12:00:00'); // noon avoids timezone shift
   if (isNaN(d.getTime())) return val;
-  var days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  return days[d.getDay()] + ' ' + months[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+  var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  return months[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
 }
 
 // ── MODAL ──────────────────────────────────────────────────────────────────────
